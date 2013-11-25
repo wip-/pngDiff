@@ -1,4 +1,4 @@
 pngDiff
 =======
 
-compare PNG with C#
+Compare PNG with C#
