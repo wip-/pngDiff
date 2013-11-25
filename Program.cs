@@ -128,7 +128,9 @@ namespace pngDiff
             Console.WriteLine("Number of different pixels: {0} ({1}%)", diffPixels, 100 * (float)diffPixels / (bitmapWidth*bitmapHeight));
             Console.WriteLine();
 
-            if (colorDictionary0.Keys.Count != colorDictionary1.Keys.Count)
+            Boolean sameColorCounts = (colorDictionary0.Keys.Count == colorDictionary1.Keys.Count);
+
+            if (!sameColorCounts)
             {
                 Console.WriteLine("Color palette sizes differ: {0} vs {1}", colorDictionary0.Keys.Count, colorDictionary1.Keys.Count);
             }
@@ -137,9 +139,13 @@ namespace pngDiff
 
             {
                 int diffColorPalette = 0;
-                foreach (Color color0 in colorDictionary0.Keys)
+
+                var bigcolorDictionary = (colorDictionary0.Keys.Count >= colorDictionary1.Keys.Count) ? colorDictionary0 : colorDictionary1;
+                var smallcolorDictionary = (colorDictionary0.Keys.Count >= colorDictionary1.Keys.Count) ? colorDictionary1 : colorDictionary0;
+
+                foreach (Color color0 in bigcolorDictionary.Keys)
                 {
-                    if (!colorDictionary1.ContainsKey(color0))
+                    if (!smallcolorDictionary.ContainsKey(color0))
                     {
                         ++diffColorPalette;
                     }
@@ -147,24 +153,30 @@ namespace pngDiff
 
                 if (diffColorPalette > 0)
                 {
-                    Console.WriteLine("Number of colors: {0}", colorDictionary0.Keys.Count);
-                    Console.WriteLine("Number of different colors: {0} ({1}%)", diffColorPalette, 100 * (float)diffColorPalette / colorDictionary0.Keys.Count);
+                    Console.WriteLine("Number of different colors: {0} ({1}%)", diffColorPalette, 100 * (float)diffColorPalette / bigcolorDictionary.Keys.Count);
                 }
-                else
+
+                //else
+
                 {
+                    int commonColorsCount = 0;
                     int diffColorDistribution = 0;
 
                     foreach (Color color0 in colorDictionary0.Keys)
                     {
-                        if (colorDictionary0[color0] != colorDictionary1[color0])
+                        if (colorDictionary1.ContainsKey(color0))
                         {
-                            ++diffColorDistribution;
+                            ++commonColorsCount;
+
+                            if (colorDictionary0[color0] != colorDictionary1[color0])
+                            {
+                                ++diffColorDistribution;
+                            }
                         }
                     }
 
-
-                    Console.WriteLine("Number of colors: {0}", colorDictionary0.Keys.Count);
-                    Console.WriteLine("Number of colors with different distribution: {0} ({1}%)", diffColorDistribution, 100 * (float)diffColorDistribution / colorDictionary0.Keys.Count);
+                    Console.WriteLine("Number of common colors: {0}", commonColorsCount);
+                    Console.WriteLine("Number of colors with different distribution among common colors: {0} ({1}%)", diffColorDistribution, 100 * (float)diffColorDistribution / commonColorsCount);
                 }
 
             }
